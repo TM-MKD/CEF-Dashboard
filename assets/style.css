@@ -1,0 +1,53 @@
+/* ---------- GLOBAL ---------- */
+body {
+    margin: 0;
+    background-color: #f5f5f5;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---------- HEADER ---------- */
+.header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background-color: #000000;
+    padding: 15px 30px;
+    border-bottom: 4px solid #c9a23f;
+}
+
+.header-logo {
+    height: 55px;
+}
+
+.header-title {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+/* ---------- PAGE ---------- */
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ---------- SCORE CARDS ---------- */
+.score-card {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    transition: transform 0.15s ease;
+}
+
+.score-card:hover {
+    transform: translateY(-2px);
+}
+
+/* ---------- CHART ---------- */
+.js-plotly-plot {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 10px;
+}
