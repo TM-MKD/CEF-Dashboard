@@ -9,50 +9,77 @@ server = app.server  # REQUIRED for Render/Gunicorn
 
 # ===================== LAYOUT =====================
 app.layout = html.Div([
-    html.H1("MK Dons - CEF Dashboard"),
 
-    dcc.Upload(
-        id='upload-data',
-        children=html.Div(['Drag and Drop or ', html.A('Select Excel File')]),
-        style={
-            'width': '60%',
-            'height': '60px',
-            'lineHeight': '60px',
-            'borderWidth': '1px',
-            'borderStyle': 'dashed',
-            'borderRadius': '5px',
-            'textAlign': 'center',
-            'margin': '10px auto'
-        },
-        multiple=False
+    # ---------- HEADER ----------
+    html.Div(
+        className="header",
+        children=[
+            html.Img(
+                src="/assets/mkdons_badge.png",
+                className="header-logo"
+            ),
+            html.H1(
+                "MK Dons – Coach Evaluation Framework",
+                className="header-title"
+            )
+        ]
     ),
 
-    html.Div(id='file-status'),
+    # ---------- PAGE CONTENT ----------
+    html.Div(
+        className="page-container",
+        children=[
 
-    dcc.Dropdown(id='participant-dropdown', placeholder="Select a coach", style={"marginTop": "10px"}),
-    dcc.Dropdown(id='block-dropdown', placeholder="Select a block", style={"marginTop": "10px"}),
+            dcc.Upload(
+                id='upload-data',
+                children=html.Div(['Drag and Drop or ', html.A('Select Excel File')]),
+                style={
+                    'width': '60%',
+                    'height': '60px',
+                    'lineHeight': '60px',
+                    'borderWidth': '1px',
+                    'borderStyle': 'dashed',
+                    'borderRadius': '5px',
+                    'textAlign': 'center',
+                    'margin': '10px auto'
+                },
+                multiple=False
+            ),
 
-    html.Div(id='group-grid', style={"marginTop": "25px"}),
-    dcc.Graph(id='question-chart'),
+            html.Div(id='file-status'),
 
-    html.Hr(),
+            dcc.Dropdown(id='participant-dropdown', placeholder="Select a coach",
+                         style={"marginTop": "10px"}),
 
-    html.Div(id='development-lists', style={"display": "flex", "gap": "40px"}),
+            dcc.Dropdown(id='block-dropdown', placeholder="Select a block",
+                         style={"marginTop": "10px"}),
 
-    html.Hr(),
-    html.H2("Block Comparison"),
+            html.Div(id='group-grid', style={"marginTop": "25px"}),
 
-    html.Div([
-        html.Div([
-            dcc.Dropdown(id='compare-block-1', placeholder="Select first block"),
-            html.Div(id='compare-grid-1')
-        ], style={"width": "48%", "display": "inline-block", "verticalAlign": "top"}),
+            dcc.Graph(id='question-chart'),
 
-        html.Div([
-            dcc.Dropdown(id='compare-block-2', placeholder="Select second block"),
-            html.Div(id='compare-grid-2')
-        ], style={"width": "48%", "display": "inline-block", "float": "right", "verticalAlign": "top"})
-    ])
+            html.Hr(),
+
+            html.Div(id='development-lists',
+                     style={"display": "flex", "gap": "40px"}),
+
+            html.Hr(),
+            html.H2("Block Comparison"),
+
+            html.Div([
+                html.Div([
+                    dcc.Dropdown(id='compare-block-1', placeholder="Select first block"),
+                    html.Div(id='compare-grid-1')
+                ], style={"width": "48%", "display": "inline-block", "verticalAlign": "top"}),
+
+                html.Div([
+                    dcc.Dropdown(id='compare-block-2', placeholder="Select second block"),
+                    html.Div(id='compare-grid-2')
+                ], style={"width": "48%", "display": "inline-block", "float": "right",
+                          "verticalAlign": "top"})
+            ])
+        ]
+    )
 ])
 
 # ===================== GLOBAL STORAGE =====================
@@ -198,20 +225,17 @@ def update_dashboard(selected_name, selected_block):
 
     scores = person_data[question_cols].values
 
-    bar_colors = []
-    for s in scores:
-        if s == 1:
-            bar_colors.append("#4CAF50")
-        elif s == 0.5:
-            bar_colors.append("#F4A261")
-        else:
-            bar_colors.append("#FF6B6B")
+    bar_colors = ["#4CAF50" if s == 1 else "#F4A261" if s == 0.5 else "#FF6B6B"
+                  for s in scores]
 
     fig = go.Figure()
     fig.add_trace(go.Bar(x=question_cols, y=scores, marker_color=bar_colors))
-    fig.update_layout(title=f"{selected_name} — {selected_block}",
-                      xaxis_title="Questions", yaxis_title="Score",
-                      yaxis=dict(range=[0, 1]))
+    fig.update_layout(
+        title=f"{selected_name} — {selected_block}",
+        xaxis_title="Questions",
+        yaxis_title="Score",
+        yaxis=dict(range=[0, 1])
+    )
 
     group_totals = [round(person_data[question_cols[i:i+4]].sum(), 2)
                     for i in range(0, len(question_cols), 4)]
@@ -221,18 +245,22 @@ def update_dashboard(selected_name, selected_block):
             html.Div(f"{score}", style={"fontSize": "28px", "fontWeight": "bold"}),
             html.Div(label, style={"fontSize": "12px"})
         ],
+        className="score-card",
         style={
             "backgroundColor": get_colour(score),
             "padding": "20px",
-            "borderRadius": "8px",
             "textAlign": "center",
             "color": "black"
         })
         for label, score in zip(GROUP_LABELS, group_totals)
-    ], style={"display": "grid", "gridTemplateColumns": "repeat(3, 1fr)", "gap": "10px", "marginBottom": "30px"})
+    ], style={
+        "display": "grid",
+        "gridTemplateColumns": "repeat(3, 1fr)",
+        "gap": "10px",
+        "marginBottom": "30px"
+    })
 
-    half_scores = []
-    zero_scores = []
+    half_scores, zero_scores = [], []
 
     for q_col in question_cols:
         q_num = int(q_col.replace("Q", ""))
@@ -281,14 +309,19 @@ def update_comparison(selected_name, block1, block2):
                 html.Div(f"{score}", style={"fontSize": "26px", "fontWeight": "bold"}),
                 html.Div(label, style={"fontSize": "11px"})
             ],
+            className="score-card",
             style={
                 "backgroundColor": get_colour(score),
                 "padding": "18px",
-                "borderRadius": "8px",
                 "textAlign": "center",
                 "color": "black"
             })
             for label, score in zip(GROUP_LABELS, group_totals)
-        ], style={"display": "grid", "gridTemplateColumns": "repeat(3, 1fr)", "gap": "10px", "marginTop": "15px"})
+        ], style={
+            "display": "grid",
+            "gridTemplateColumns": "repeat(3, 1fr)",
+            "gap": "10px",
+            "marginTop": "15px"
+        })
 
     return make_grid(block1), make_grid(block2)
